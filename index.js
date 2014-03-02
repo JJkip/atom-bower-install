@@ -53,12 +53,12 @@ function notice(message, className) {
   }, 4500);
 }
 
-function parseHtml(html, bowerrc) {
+function parseHtml(rawHtml, bowerrc) {
   var components = [];
 
   var parser = new htmlparser.Parser({
     onopentag: function(name, attrs){
-      if(name === 'script' && attrs.type === 'text/javascript'){
+      if(name === 'script' && attrs.src){
         console.log('JS! Hooray!', attrs.src);
         var source = attrs.src.split('/');
         _(source).each(function(src, index, collection) {
