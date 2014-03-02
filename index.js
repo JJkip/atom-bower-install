@@ -53,7 +53,7 @@ function notice(message, className) {
   }, 4500);
 }
 
-function parseHtml(rawHtml, bowerrc) {
+function parseHtml(html, bowerrc) {
   var components = [];
 
   var parser = new htmlparser.Parser({
