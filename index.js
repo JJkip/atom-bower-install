@@ -1,20 +1,19 @@
-var core = require('resolve/lib/core.json');
 var safeJSONParse = require('safe-json-parse');
+var htmlparser    = require('htmlparser2');
 var ansihtml  = require('ansi-html-stream');
-var spawn  = require('child_process').spawn;
-var remove = require('remove-element');
-var coffee = require('coffee-script');
-var detective = require('detective');
-var domify = require('domify');
 var findup = require('findup');
+var remove = require('remove-element');
+var spawn  = require('child_process').spawn;
+var core = require('resolve/lib/core.json');
 var path = require('path');
 var fs   = require('fs');
+var _    = require('underscore');
 
 exports.activate   = activate;
 exports.deactivate = deactivate;
 
 var messages = {
-  cantFind: 'Hmm... Couldn\'t find any packages to install!',
+  cantFind: 'Couldn\'t find any components to install!',
   oneAtATime: 'Sorry, you can only run one installation at a time',
   alreadyInstalled: 'Hey, looks like everything has already been installed!'
 };
@@ -54,6 +53,28 @@ function notice(message, className) {
   }, 4500);
 }
 
+function parseHtml(html, bowerrc) {
+  var components = [];
+
+  var parser = new htmlparser.Parser({
+    onopentag: function(name, attrs){
+      if(name === 'script' && attrs.type === 'text/javascript'){
+        console.log('JS! Hooray!', attrs.src);
+        var source = attrs.src.split('/');
+        _(source).each(function(src, index, collection) {
+          if (src === 'bower_components') {
+            components.push(collection[index+1]);
+          }
+        });
+      }
+    }
+  });
+
+  parser.write(html);
+  parser.end();
+  return components;
+}
+
 function save(opts) {
   opts = opts || {};
 
@@ -75,9 +96,14 @@ function save(opts) {
 
     var flag = opts.dev ? '--save-dev' : '--save';
 
+    var bwrFile = path.join(cwd, 'bower.json');
+    var bwrData = fs.readFileSync(bwrFile, 'utf8');
+    var bwrRcFile = path.join(cwd, '.bowerrc');
+    var bwrRc = fs.readFileSync(bwrRcFile, 'utf8');
+
     var found;
     try {
-      found = detective(path.extname(file) === '.coffee' ? coffee.compile(data) : data);
+      found = parseHtml(data, bwrRc);
     } catch(e) {
       return notice(e.message, 'warning');
     }
@@ -95,8 +121,6 @@ function save(opts) {
     if (!found.length) { return notice(messages.cantFind); }
     if (!(cwd = findup.sync(cwd, 'bower.json'))) { return; }
 
-    var bwrFile = path.join(cwd, 'bower.json');
-    var bwrData = fs.readFileSync(bwrFile, 'utf8');
 
     safeJSONParse(bwrData, function(err, bwr) {
       if (err) { return console.error(err); }
