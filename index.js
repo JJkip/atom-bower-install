@@ -88,6 +88,7 @@ function save(opts) {
     var editor = atom.workspace.activePaneItem;
     var view = atom.workspaceView;
 
+    var root = atom.project.path;
     var data = editor.getBuffer().cachedText;
     var file = editor.getPath();
     var cwd = path.dirname(file);
@@ -96,9 +97,9 @@ function save(opts) {
 
     var flag = opts.dev ? '--save-dev' : '--save';
 
-    var bwrFile = path.join(cwd, 'bower.json');
+    var bwrFile = path.join(root, 'bower.json');
     var bwrData = fs.readFileSync(bwrFile, 'utf8');
-    var bwrRcFile = path.join(cwd, '.bowerrc');
+    var bwrRcFile = path.join(root, '.bowerrc');
     var bwrRc = fs.readFileSync(bwrRcFile, 'utf8');
 
     var found;
