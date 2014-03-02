@@ -1,7 +1,7 @@
 {
   "name": "bower-install",
   "main": "./index",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "description": "Automatically install and save any missing bower components being used in the current bower.json file",
   "repository": "https://github.com/gdi2290/atom-bower-install",
