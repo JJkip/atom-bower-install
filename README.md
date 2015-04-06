@@ -1,4 +1,5 @@
-# bower-install package
+# status: NOT WORKING
+## bower-install package
 
 A short description of your package.
 
